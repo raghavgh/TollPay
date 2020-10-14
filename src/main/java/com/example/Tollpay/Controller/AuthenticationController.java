@@ -1,20 +1,19 @@
 package com.example.Tollpay.Controller;
 
-import com.example.Tollpay.dto.DashboardData;
-import com.example.Tollpay.dto.RegestrationData;
-import com.example.Tollpay.dto.Welcome;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.example.Tollpay.Log.Log;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("authentication")
 public class AuthenticationController {
-    @PostMapping("/welcome")
-    public Welcome registerNewUser(@RequestParam RegestrationData regestrationData){
-        return new Welcome("Welcome to the TollPay "+ regestrationData.getName());
-
+    @PostMapping("welcome")
+    public String registerNewUser(){
+        Log.print("Welcome ");
+        return "Welcome to the TollPay ";
+    }
+    @GetMapping("test")
+    public String test(){
+        return "Working";
     }
 
 }
