@@ -12,6 +12,7 @@ public class HomeController {
 
     @GetMapping
     public String welcome(){
+
         Log.print("GET REQUEST FOR HOME CONTROLLER");
         return "Connected to Server";
 
