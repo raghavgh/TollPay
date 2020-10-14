@@ -9,11 +9,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("authentication")
 public class AuthenticationController {
 
+
     @PostMapping(value = "welcome")
     public Welcome registerNewUser(@RequestBody RegistrationData registrationData){
         try{
-
             Log.print("Welcome ");
+            Log.print(registrationData.toString());
+            Log.print(""+registrationData.getId());
             return new Welcome("Welcome to TollPay " + registrationData.getName());
         }
         catch (Exception e){
