@@ -14,6 +14,7 @@ public class AuthenticationController {
     @PostMapping("/welcome")
     public Welcome registerNewUser(@RequestParam RegestrationData regestrationData){
         return new Welcome("Welcome to the TollPay "+ regestrationData.getName());
+
     }
 
 }
