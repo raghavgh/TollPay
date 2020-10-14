@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
 
+
+
     @PostMapping(value = "welcome")
     public Welcome registerNewUser(@RequestBody RegistrationData registrationData){
         try{
