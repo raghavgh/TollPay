@@ -1,6 +1,6 @@
-package com.example.Tollpay.Controller;
+package com.example.Tollpay.controller;
 
-import com.example.Tollpay.Log.Log;
+import com.example.Tollpay.log.Log;
 import com.example.Tollpay.dto.RegistrationData;
 import com.example.Tollpay.dto.Welcome;
 import org.springframework.web.bind.annotation.*;

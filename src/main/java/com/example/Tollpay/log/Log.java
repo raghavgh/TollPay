@@ -1,4 +1,4 @@
-package com.example.Tollpay.Log;
+package com.example.Tollpay.log;
 
 public class Log {
     public static void print(String value){
