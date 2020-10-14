@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("authentication")
 public class AuthenticationController {
+
     @PostMapping("welcome")
     public String registerNewUser(){
         Log.print("Welcome ");
