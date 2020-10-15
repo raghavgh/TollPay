@@ -14,8 +14,9 @@ public class TRAVELLER {
     Long id;
     private String name;
     private String password;
-    private String vehicleNumber;
     private String email;
+    private String mobileNum;
+    
 
     public Long getId() {
         return id;
@@ -34,14 +35,6 @@ public class TRAVELLER {
         this.password = password;
     }
 
-    public String getVehicleNumber() {
-        return vehicleNumber;
-    }
-
-    public void setVehicleNumber(String vehicleNumber) {
-        this.vehicleNumber = vehicleNumber;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -56,6 +49,14 @@ public class TRAVELLER {
 
     public void setName(String name) {
         this.name = name;
+    }
+    
+    public void setMobileNum(String mobileNum){
+        mobileNum = this.mobileNum;
+    }
+    
+    public String getMobileNum(){
+        return this.mobileNum;
     }
 
     @Override
