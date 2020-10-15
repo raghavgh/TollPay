@@ -1,6 +1,5 @@
 package com.example.Tollpay.dto;
 
-import jdk.jfr.DataAmount;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
