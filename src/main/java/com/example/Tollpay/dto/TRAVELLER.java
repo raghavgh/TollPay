@@ -62,6 +62,6 @@ public class TRAVELLER {
     @Override
     public String toString() {
         return  "\n name = " + name +
-                "\n password = " + password + "\n vehcicleNumber = "+ vehicleNumber+"\n";
+                "\n password = " + password + "\n mobileNum = "+ mobileNum+"\n";
     }
 }
