@@ -1,22 +1,19 @@
 package com.example.Tollpay.dto;
 
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class TRAVELLER {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    Long id;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
     private String name;
     private String password;
     private String email;
     private String mobileNum;
-    
+
 
     public Long getId() {
         return id;
@@ -52,7 +49,7 @@ public class TRAVELLER {
     }
     
     public void setMobileNum(String mobileNum){
-        mobileNum = this.mobileNum;
+        this.mobileNum = mobileNum;
     }
     
     public String getMobileNum(){
@@ -62,6 +59,6 @@ public class TRAVELLER {
     @Override
     public String toString() {
         return  "\n name = " + name +
-                "\n password = " + password + "\n mobileNum = "+ mobileNum+"\n";
+                "\n password = " + password + "\n mobileNum = "+ mobileNum +"\n";
     }
 }

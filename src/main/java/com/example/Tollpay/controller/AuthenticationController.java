@@ -3,6 +3,7 @@ package com.example.Tollpay.controller;
 import com.example.Tollpay.log.Log;
 import com.example.Tollpay.dto.TRAVELLER;
 import com.example.Tollpay.dto.Welcome;
+import com.example.Tollpay.repository.TravellerRepository;
 import com.example.Tollpay.service.TravellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ public class AuthenticationController {
 
     @Autowired
     TravellerService travellerService;
+
 
     //when user come to register this api hits
     @PostMapping(value = "welcome")
@@ -35,7 +37,7 @@ public class AuthenticationController {
     //get mapping to test authentication api
     @GetMapping("test")
     public String test(){
-        return "Working";
+        return "Test";
     }
 
 }
