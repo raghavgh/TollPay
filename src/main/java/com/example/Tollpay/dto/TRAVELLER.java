@@ -59,6 +59,6 @@ public class TRAVELLER {
     @Override
     public String toString() {
         return  "\n name = " + name +
-                "\n password = " + password + "\n mobileNum = "+ mobileNum +"\n";
+                "\n password = " + password + "\n email = "+ email + "\n mobileNum = "+ mobileNum +"\n";
     }
 }
