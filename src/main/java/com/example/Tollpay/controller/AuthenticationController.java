@@ -52,6 +52,7 @@ public class AuthenticationController {
         Log.print("POST REQUEST 'login' FOR AUTHENTICTION CONTROLLER");
         Log.print("DATA GOT FROM FRONTEND = " + loginData.toString());
 
+
         try {
             if(travellerService.authenticateUserData(loginData)) {
                 return ResponseEntity.status(HttpStatus.OK)
