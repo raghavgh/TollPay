@@ -25,5 +25,6 @@ public class GpsController {
         else{
             return new ResponseEntity<>("Please login", HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>("hy",HttpStatus.OK);
     }
 }
