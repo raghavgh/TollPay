@@ -11,7 +11,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "TOLL_CHARGES")
 public class TollCharges {
-    private Integer tollId;
+    @Id
+    private Long tollId;
     @Column(name = "VEHICLE_TYPE")
     private String vehicleType;
     @Column(name = "TOLL_CHARGES")

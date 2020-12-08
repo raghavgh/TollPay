@@ -1,8 +1,7 @@
 package com.example.Tollpay.service;
 
 import com.example.Tollpay.TollpayApplication;
-import com.example.Tollpay.dto.LoginResponse;
-import com.example.Tollpay.dto.User;
+import com.example.Tollpay.dto.*;
 import com.example.Tollpay.entity.TollCharges;
 import com.example.Tollpay.entity.TollPlaza;
 import com.example.Tollpay.entity.Traveller;
@@ -103,25 +102,74 @@ public class TravellerServiceImpl implements TravellerService {
         TollpayApplication.credentialHash.put(token,user);
         return new LoginResponse(token,user.getEmail());
     }
+
+    @Override
+    public Profile addDataIntoProfile(User user) {
+        Double currentAmount = getCurrentAmount(user.getEmail());
+        Profile profile = new Profile(user.getName(),user.getEmail(),user.getMobileNum(),
+                user.getVehicleNumber(), user.getVehicleType(),currentAmount);
+        return profile;
+    }
+
+    private Double getTollCharge(Long tollId){
+        Double tollCharge = 0.0;
+        Iterable<TollCharges> charges = tollChargesRepository.findAll();
+        for(TollCharges charge : charges){
+            if(charge.getTollId().equals(tollId)){
+                tollCharge = charge.getCharges();
+            }
+        }
+        return tollCharge;
+    }
+
+    private Double getCurrentAmount(String email){
+        Double currentBalance = 0.0;
+        Iterable<Traveller> travellers = travellerRepository.findAll();
+        for(Traveller traveller : travellers){
+            if(traveller.getEmail().equals(email)){
+                currentBalance = traveller.getWalletAmount();
+                break;
+            }
+        }
+        return currentBalance;
+    }
+
     private boolean deductAmount(Integer token,Long tollId){
         User user = TollpayApplication.credentialHash.get(token);
 
         //Logic to get toll charges for type
-        TollCharges charges = tollChargesRepository.getTollChargesByTollIdAndType(tollId,user.getVehicleType());
-        Double tollCharges = charges.getCharges();
+        Double tollCharge = getTollCharge(tollId);
 
         //Logic to get current balance of use
-        Double currentBalance = travellerRepository.findAmountByEmail(user.getEmail()).get(0);
+        Double currentBalance = getCurrentAmount(user.getEmail());
 
-        if(currentBalance >= tollCharges){
-            currentBalance -= tollCharges;
+        if(currentBalance >= tollCharge){
+            currentBalance -= tollCharge;
             travellerRepository.updateByEmail(currentBalance,user.getEmail());
+            return true;
         }
         else{
             return false;
         }
-        //Logic to update balance of user
-        return true;
+    }
+
+    @Override
+    public PaymentResponse getPaymentResponse(Integer token, Long tollId) {
+        boolean status  = deductAmount(token,tollId);
+        if(status){
+            return new PaymentResponse("Payment",true,getCurrentAmount(
+                    TollpayApplication.credentialHash.get(token).getEmail()), getTollCharge(tollId));
+        }
+        else{
+            return new PaymentResponse("Payment",false,
+                    -1.0,-1.0);
+        }
+    }
+
+    @Override
+    public RangeStatus getRangeStatus(Integer token, Long tollId) {
+        String email = TollpayApplication.credentialHash.get(token).getEmail();
+        return new RangeStatus("Range",true,getTollCharge(tollId),getCurrentAmount(email));
     }
 
     private void loadTollData(){
@@ -135,20 +183,42 @@ public class TravellerServiceImpl implements TravellerService {
 
     }
 
+
+
     //remaining code
     @Override
-    public void checkTollPlazaInRange(Double latitude, Double longitude, Integer token) {
+    public Long checkTollPlazaInRange(Double latitude, Double longitude, Integer token) {
         if(tolls.size() == 0){
             loadTollData();
         }
+        Long res = -1l;
         for(TollPlaza toll : tolls){
             if(distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")*1000 <= 20){
-                if(deductAmount(token,toll.getTollId()))
-                    openGates();
-                else{
-                    payByManualMethod();
-                }
+                res = toll.getTollId();
+//                if(deductAmount(token,toll.getTollId())) {
+//                    openGates();
+//                    break;
+//                }
+//                else{
+//                    payByManualMethod();
+//                    break;
+//                }
+                break;
             }
+        }
+        return res;
+    }
+
+    @Override
+    public boolean addAmount(Amount amount) {
+        try {
+            User user = TollpayApplication.credentialHash.get(amount.getToken());
+            Double currentAmount = getCurrentAmount(user.getEmail());
+            currentAmount += amount.getAmount();
+            travellerRepository.updateByEmail(currentAmount, user.getEmail());
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 

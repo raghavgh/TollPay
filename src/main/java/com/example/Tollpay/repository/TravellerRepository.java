@@ -13,9 +13,6 @@ import java.util.List;
 //for more clarity check class defination
 public interface TravellerRepository extends JpaRepository<Traveller,Long> {
     public Traveller findByEmail(String email);
-    @Query(value = "select WALLET_AMOUNT from TRAVELLER where EMAIL= ?1",nativeQuery = true)
-    public List<Double> findAmountByEmail(String email);
     @Query(value = "update TRAVELLER  set WALLET_AMOUNT=?1 where EMAIL= ?2")
     public void updateByEmail(Double amount,String email);
-
 }
