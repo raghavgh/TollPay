@@ -21,7 +21,7 @@ public class AuthenticationController {
     TravellerService travellerService ;
     //when user come to register this api hits
     @RequestMapping(value = "/welcome",method = RequestMethod.POST,headers = "Accept=application/json")
-    public ResponseEntity<String> registerNewUser(@RequestBody User user){
+    public ResponseEntity<?> registerNewUser(@RequestBody User user){
         try{
             //Logs for debugging
             Log.print("GET REQUEST 'welcome' FOR AUTHENTICATION CONTROLLER");

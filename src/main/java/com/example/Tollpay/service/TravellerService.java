@@ -7,8 +7,8 @@ public interface TravellerService {
     public boolean authenticateUserData(String email,String password);
     public LoginResponse loginUser(String email);
     public Profile addDataIntoProfile(User user);
-    public Long checkTollPlazaInRange(Double latitude, Double longitude, Integer token);
+    public Integer checkTollPlazaInRange(Double latitude, Double longitude, Integer token);
     public boolean addAmount(Amount amount);
-    public PaymentResponse getPaymentResponse(Integer token, Long tollId);
-    public RangeStatus getRangeStatus(Integer token, Long tollId);
+    public PaymentResponse getPaymentResponse(Integer token, Integer tollId);
+    public RangeStatus getRangeStatus(Integer token, Integer tollId);
 }

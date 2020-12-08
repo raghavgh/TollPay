@@ -89,18 +89,33 @@ public class TravellerServiceImpl implements TravellerService {
         return TollpayApplication.queue.remove();
     }
 
+    private Vehicle findByUserId(Integer id){
+        Iterable<Vehicle> vehicles = vehicleRepository.findAll();
+        for(Vehicle vehicle: vehicles){
+            if(vehicle.getId().equals(id)){
+                return vehicle;
+            }
+        }
+        return null;
+    }
+
     @Override
     public LoginResponse loginUser(String email){
         Integer token = generateToken();
         TollpayApplication.tokenHash[token] = true;
         //get Email from database
-        Traveller traveller = travellerRepository.findByEmail(email);
-        Vehicle vehicle =vehicleRepository.findByUserId(traveller.getId());
-        User user = new User(traveller.getId(),traveller.getName(),traveller.getPassword()
-                ,traveller.getEmail(),traveller.getMobileNum(),vehicle.getVehicleNumber(),vehicle.getVehicleType());
-        // use hash to store user information with token
-        TollpayApplication.credentialHash.put(token,user);
-        return new LoginResponse(token,user.getEmail());
+        try {
+            Traveller traveller = travellerRepository.findByEmail(email);
+            Vehicle vehicle = findByUserId(traveller.getId());
+            User user = new User(traveller.getId(), traveller.getName(), traveller.getPassword()
+                    , traveller.getEmail(), traveller.getMobileNum(), vehicle.getVehicleNumber(), vehicle.getVehicleType());
+            // use hash to store user information with token
+            TollpayApplication.credentialHash.put(token, user);
+            return new LoginResponse(token,user.getEmail());
+        } catch (Exception e){
+            e.printStackTrace();
+            return new LoginResponse(-1,"");
+        }
     }
 
     @Override
@@ -111,7 +126,7 @@ public class TravellerServiceImpl implements TravellerService {
         return profile;
     }
 
-    private Double getTollCharge(Long tollId){
+    private Double getTollCharge(Integer tollId){
         Double tollCharge = 0.0;
         Iterable<TollCharges> charges = tollChargesRepository.findAll();
         for(TollCharges charge : charges){
@@ -134,7 +149,7 @@ public class TravellerServiceImpl implements TravellerService {
         return currentBalance;
     }
 
-    private boolean deductAmount(Integer token,Long tollId){
+    private boolean deductAmount(Integer token,Integer tollId){
         User user = TollpayApplication.credentialHash.get(token);
 
         //Logic to get toll charges for type
@@ -154,7 +169,7 @@ public class TravellerServiceImpl implements TravellerService {
     }
 
     @Override
-    public PaymentResponse getPaymentResponse(Integer token, Long tollId) {
+    public PaymentResponse getPaymentResponse(Integer token, Integer tollId) {
         boolean status  = deductAmount(token,tollId);
         if(status){
             return new PaymentResponse("Payment",true,getCurrentAmount(
@@ -167,7 +182,7 @@ public class TravellerServiceImpl implements TravellerService {
     }
 
     @Override
-    public RangeStatus getRangeStatus(Integer token, Long tollId) {
+    public RangeStatus getRangeStatus(Integer token, Integer tollId) {
         String email = TollpayApplication.credentialHash.get(token).getEmail();
         return new RangeStatus("Range",true,getTollCharge(tollId),getCurrentAmount(email));
     }
@@ -187,11 +202,11 @@ public class TravellerServiceImpl implements TravellerService {
 
     //remaining code
     @Override
-    public Long checkTollPlazaInRange(Double latitude, Double longitude, Integer token) {
+    public Integer checkTollPlazaInRange(Double latitude, Double longitude, Integer token) {
         if(tolls.size() == 0){
             loadTollData();
         }
-        Long res = -1l;
+        Integer res = -1;
         for(TollPlaza toll : tolls){
             if(distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")*1000 <= 20){
                 res = toll.getTollId();

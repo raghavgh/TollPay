@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface TollPlazaRepository extends JpaRepository<TollPlaza,Long> {
+public interface TollPlazaRepository extends JpaRepository<TollPlaza,Integer> {
 }

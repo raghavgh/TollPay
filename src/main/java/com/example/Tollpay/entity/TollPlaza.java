@@ -12,7 +12,7 @@ import javax.persistence.Id;
 public class TollPlaza {
     @Id
     @Column(name = "TOLL_ID")
-    private Long tollId;
+    private Integer tollId;
     @Column(name = "TOLL_NAME")
     private String TollName;
     private Double latitude;

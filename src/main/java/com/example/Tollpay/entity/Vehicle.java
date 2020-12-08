@@ -18,5 +18,5 @@ public class Vehicle {
     @Column(name = "TYPE")
     private String vehicleType;
     @Column(name = "TRAVELLER_ID")
-    private Long id;
+    private Integer id;
 }

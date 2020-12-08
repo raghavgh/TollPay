@@ -22,7 +22,7 @@ public class GpsController {
     public ResponseEntity<?> getFinalStatus(@RequestBody GpsData gpsData){
         ResponseEntity<?> responseEntity;
         if(LoginChecker.isUserLogined(gpsData.getToken())){
-            Long tollId = -1l;
+            Integer tollId = -1;
             tollId = service.checkTollPlazaInRange(gpsData.getCoordinates().getLatitude()
                     ,gpsData.getCoordinates().getLongitude(),gpsData.getToken());
             PaymentResponse paymentResponse;
@@ -45,7 +45,7 @@ public class GpsController {
     public ResponseEntity<?> getRangeStatus(@RequestBody GpsData gpsData){
         ResponseEntity<?> responseEntity;
         if(LoginChecker.isUserLogined(gpsData.getToken())){
-            Long tollId = -1l;
+            Integer tollId = -1;
             tollId = service.checkTollPlazaInRange(gpsData.getCoordinates().getLatitude()
                     ,gpsData.getCoordinates().getLongitude(),gpsData.getToken());
             if(tollId != -1){
