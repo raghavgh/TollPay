@@ -1,14 +1,13 @@
 package com.example.Tollpay.service;
 
-import com.example.Tollpay.dto.LoginData;
 import com.example.Tollpay.dto.LoginResponse;
-import com.example.Tollpay.dto.TRAVELLER;
-import org.springframework.web.bind.annotation.RequestBody;
+import com.example.Tollpay.dto.Session;
+import com.example.Tollpay.dto.User;
 
 public interface TravellerService {
-    public void registerTraveller(TRAVELLER traveller);
+    public void registerTraveller(User user);
     public boolean authenticateUserData(String email,String password);
     public LoginResponse loginUser(String email);
 
-    void checkTollPlazaInRange(Double latitude, Double latitude1);
+    void checkTollPlazaInRange(Double latitude, Double longitude, Integer token);
 }

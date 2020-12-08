@@ -3,6 +3,7 @@ package com.example.Tollpay.controller;
 import com.example.Tollpay.TollpayApplication;
 import com.example.Tollpay.controller.checker.LoginChecker;
 import com.example.Tollpay.dto.GpsData;
+import com.example.Tollpay.dto.Session;
 import com.example.Tollpay.service.TravellerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,8 @@ public class GpsController {
     @RequestMapping(value = "/coord",method = RequestMethod.POST)
     public ResponseEntity<?> getCoordinates(@RequestBody GpsData gpsData){
         if(LoginChecker.isUserLogined(gpsData.getToken())){
-            service.checkTollPlazaInRange(gpsData.getLatitude(),gpsData.getLatitude());
+            service.checkTollPlazaInRange(gpsData.getCoordinates().getLatitude()
+                    ,gpsData.getCoordinates().getLongitude(),gpsData.getToken());
         }
         else{
             return new ResponseEntity<>("Please login", HttpStatus.BAD_REQUEST);

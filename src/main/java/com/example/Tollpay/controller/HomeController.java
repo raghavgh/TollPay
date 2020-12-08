@@ -1,9 +1,10 @@
 package com.example.Tollpay.controller;
 
+import com.example.Tollpay.dto.Amount;
 import com.example.Tollpay.log.Log;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/")
@@ -15,5 +16,10 @@ public class HomeController {
         Log.print("GET REQUEST FOR HOME CONTROLLER");
         return "Connected to Server";
 
+    }
+    @RequestMapping(value = "/addAmount",method = RequestMethod.POST)
+    public ResponseEntity<?> addAmount(@RequestBody Amount amount){
+        System.out.println("amount recieved === "+ amount);
+        return new ResponseEntity<>("Amount Added", HttpStatus.OK);
     }
 }

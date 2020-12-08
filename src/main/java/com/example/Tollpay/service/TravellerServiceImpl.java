@@ -1,22 +1,28 @@
 package com.example.Tollpay.service;
 
 import com.example.Tollpay.TollpayApplication;
-import com.example.Tollpay.dto.LoginData;
 import com.example.Tollpay.dto.LoginResponse;
-import com.example.Tollpay.dto.TRAVELLER;
+import com.example.Tollpay.dto.User;
+import com.example.Tollpay.entity.TollCharges;
+import com.example.Tollpay.entity.TollPlaza;
+import com.example.Tollpay.entity.Traveller;
+import com.example.Tollpay.entity.Vehicle;
 import com.example.Tollpay.log.Log;
+import com.example.Tollpay.repository.TollChargesRepository;
+import com.example.Tollpay.repository.TollPlazaRepository;
 import com.example.Tollpay.repository.TravellerRepository;
+import com.example.Tollpay.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Transactional
 @Service
 public class TravellerServiceImpl implements TravellerService {
-
-
+    List<TollPlaza> tolls;
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
         if ((lat1 == lat2) && (lon1 == lon2)) {
             return 0;
@@ -42,27 +48,40 @@ public class TravellerServiceImpl implements TravellerService {
     @Autowired
     TravellerRepository travellerRepository;
 
+    @Autowired
+    VehicleRepository vehicleRepository;
+
+    @Autowired
+    TollChargesRepository tollChargesRepository;
+
+    @Autowired
+    TollPlazaRepository tollPlazaRepository;
+
     @Override
-    public void registerTraveller(TRAVELLER traveller) {
+    public void registerTraveller(User user) {
         //Log for debugging
         Log.print("SERVICE CLASS -> FUNCTION -> registerTraveller");
-
         //add user to the database
+        Traveller traveller = new Traveller(user.getEmail()
+                ,user.getPassword(),user.getName(),user.getPassword(),0.0);
         travellerRepository.save(traveller);
+//        Vehicle vehicle = new Vehicle(user.getVehicleNumber(),user.getVehicleType(),traveller.getId());
+//        vehicleRepository.save(vehicle);
+
     }
 
     @Override
     public boolean authenticateUserData(String email,String password) {
         Log.print("SERVICE CLASS -> FUNCTION -> authenticateUserData");
 
-        TRAVELLER traveller = travellerRepository.findByEmail(email);
+        Traveller user = travellerRepository.findByEmail(email);
 
-        if(traveller == null) {
+        if(user == null) {
             Log.print("traveller null");
             return false;
         }
-        if(!traveller.getPassword().equals(password)){
-            Log.print("Traveller data == > " + traveller.toString());
+        if(!user.getPassword().equals(password)){
+            Log.print("Traveller data == > " + user.toString());
             throw new RuntimeException("Password mismatch.");
         }
         return true;
@@ -75,12 +94,62 @@ public class TravellerServiceImpl implements TravellerService {
     public LoginResponse loginUser(String email){
         Integer token = generateToken();
         TollpayApplication.tokenHash[token] = true;
-        return new LoginResponse(token,email);
+        //get Email from database
+        Traveller traveller = travellerRepository.findByEmail(email);
+        Vehicle vehicle =vehicleRepository.findByUserId(traveller.getId());
+        User user = new User(traveller.getId(),traveller.getName(),traveller.getPassword()
+                ,traveller.getEmail(),traveller.getMobileNum(),vehicle.getVehicleNumber(),vehicle.getVehicleType());
+        // use hash to store user information with token
+        TollpayApplication.credentialHash.put(token,user);
+        return new LoginResponse(token,user.getEmail());
+    }
+    private boolean deductAmount(Integer token,Long tollId){
+        User user = TollpayApplication.credentialHash.get(token);
+
+        //Logic to get toll charges for type
+        TollCharges charges = tollChargesRepository.getTollChargesByTollIdAndType(tollId,user.getVehicleType());
+        Double tollCharges = charges.getCharges();
+
+        //Logic to get current balance of use
+        Double currentBalance = travellerRepository.findAmountByEmail(user.getEmail()).get(0);
+
+        if(currentBalance >= tollCharges){
+            currentBalance -= tollCharges;
+            travellerRepository.updateByEmail(currentBalance,user.getEmail());
+        }
+        else{
+            return false;
+        }
+        //Logic to update balance of user
+        return true;
     }
 
-    @Override
-    public void checkTollPlazaInRange(Double latitude, Double latitude1) {
+    private void loadTollData(){
+        tolls = tollPlazaRepository.findAll();
+    }
 
+    private void openGates(){
+
+    }
+    private void payByManualMethod(){
+
+    }
+
+    //remaining code
+    @Override
+    public void checkTollPlazaInRange(Double latitude, Double longitude, Integer token) {
+        if(tolls.size() == 0){
+            loadTollData();
+        }
+        for(TollPlaza toll : tolls){
+            if(distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")*1000 <= 20){
+                if(deductAmount(token,toll.getTollId()))
+                    openGates();
+                else{
+                    payByManualMethod();
+                }
+            }
+        }
     }
 
 

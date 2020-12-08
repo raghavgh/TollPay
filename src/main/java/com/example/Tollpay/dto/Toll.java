@@ -5,8 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class GpsData {
+public class Toll {
     private Coordinates coordinates;
-    private String email;
-    private Integer token;
+
 }
