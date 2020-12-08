@@ -8,12 +8,17 @@ import javax.persistence.*;
 
 @Entity(name = "TRAVELLER")
 @Data
+@AllArgsConstructor
 public class Traveller {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Integer id;
+    @Column(name = "NAME")
     private String name;
+    @Column(name = "PASSWORD")
     private String password;
+    @Column(name = "EMAIL")
     private String email;
     @Column(name = "MOBILE_NUM")
     private String mobileNum;
@@ -26,5 +31,8 @@ public class Traveller {
         this.mobileNum = mobileNum;
         this.name = name;
         this.walletAmount = walletAmount;
+    }
+    public Traveller(){
+
     }
 }

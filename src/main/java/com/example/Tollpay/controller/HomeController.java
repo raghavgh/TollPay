@@ -1,6 +1,7 @@
 package com.example.Tollpay.controller;
 
 import com.example.Tollpay.TollpayApplication;
+import com.example.Tollpay.controller.checker.LoginChecker;
 import com.example.Tollpay.dto.Amount;
 import com.example.Tollpay.dto.Profile;
 import com.example.Tollpay.dto.Session;
@@ -29,16 +30,18 @@ public class HomeController {
     }
     @RequestMapping(value = "/addAmount",method = RequestMethod.POST)
     public ResponseEntity<?> addAmount(@RequestBody Amount amount){
-        System.out.println("amount recieved === "+ amount);
-        boolean status = service.addAmount(amount);
-        String res = "";
-        if(status == true){
-            res = "Amount added Successfully";
+        if(LoginChecker.isUserLogined(amount.getToken())) {
+            System.out.println("amount recieved === " + amount);
+            boolean status = service.addAmount(amount);
+            String res = "";
+            if (status == true) {
+                res = "Amount added Successfully";
+            } else {
+                res = "Amount addition failed";
+            }
+            return new ResponseEntity<>(res, HttpStatus.OK);
         }
-        else{
-            res = "Amount addition failed";
-        }
-        return new ResponseEntity<>("Amount Added", HttpStatus.OK);
+        return new ResponseEntity<>("Please login before ",HttpStatus.OK);
     }
 
     @RequestMapping(value = "/profile",method = RequestMethod.POST)

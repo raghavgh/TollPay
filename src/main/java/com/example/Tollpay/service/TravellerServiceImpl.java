@@ -61,19 +61,32 @@ public class TravellerServiceImpl implements TravellerService {
         //Log for debugging
         Log.print("SERVICE CLASS -> FUNCTION -> registerTraveller");
         //add user to the database
-        Traveller traveller = new Traveller(user.getEmail()
-                ,user.getPassword(),user.getName(),user.getPassword(),0.0);
+        Traveller traveller = new Traveller(user.getName(), user.getPassword(), user.getEmail(),
+                user.getMobileNum(), 0.0);
+        System.out.println(user);
         travellerRepository.save(traveller);
-//        Vehicle vehicle = new Vehicle(user.getVehicleNumber(),user.getVehicleType(),traveller.getId());
-//        vehicleRepository.save(vehicle);
+        Vehicle vehicle = new Vehicle(user.getVehicleNumber(),user.getVehicleType(),traveller.getId());
+        System.out.println(vehicle);
+        vehicleRepository.save(vehicle);
 
+    }
+
+    private Traveller findByEmail(String email){
+        Iterable<Traveller> travellers = travellerRepository.findAll();
+        for(Traveller traveller : travellers){
+            System.out.println(traveller);
+            if(traveller.getEmail().equals(email)){
+                return traveller;
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean authenticateUserData(String email,String password) {
         Log.print("SERVICE CLASS -> FUNCTION -> authenticateUserData");
 
-        Traveller user = travellerRepository.findByEmail(email);
+        Traveller user = findByEmail(email);
 
         if(user == null) {
             Log.print("traveller null");
@@ -81,7 +94,7 @@ public class TravellerServiceImpl implements TravellerService {
         }
         if(!user.getPassword().equals(password)){
             Log.print("Traveller data == > " + user.toString());
-            throw new RuntimeException("Password mismatch.");
+            return false;
         }
         return true;
     }
@@ -92,6 +105,7 @@ public class TravellerServiceImpl implements TravellerService {
     private Vehicle findByUserId(Integer id){
         Iterable<Vehicle> vehicles = vehicleRepository.findAll();
         for(Vehicle vehicle: vehicles){
+
             if(vehicle.getId().equals(id)){
                 return vehicle;
             }
@@ -100,18 +114,23 @@ public class TravellerServiceImpl implements TravellerService {
     }
 
     @Override
-    public LoginResponse loginUser(String email){
+    public LoginResponse loginUser(String email,String password){
         Integer token = generateToken();
         TollpayApplication.tokenHash[token] = true;
         //get Email from database
         try {
-            Traveller traveller = travellerRepository.findByEmail(email);
-            Vehicle vehicle = findByUserId(traveller.getId());
-            User user = new User(traveller.getId(), traveller.getName(), traveller.getPassword()
-                    , traveller.getEmail(), traveller.getMobileNum(), vehicle.getVehicleNumber(), vehicle.getVehicleType());
-            // use hash to store user information with token
-            TollpayApplication.credentialHash.put(token, user);
-            return new LoginResponse(token,user.getEmail());
+            Traveller traveller = findByEmail(email);
+            if(traveller.getPassword().equals(password)) {
+                Vehicle vehicle = findByUserId(traveller.getId());
+                User user = new User(traveller.getId(), traveller.getName(), traveller.getPassword()
+                        , traveller.getEmail(), traveller.getMobileNum(), vehicle.getVehicleNumber(), vehicle.getVehicleType());
+                // use hash to store user information with token
+                TollpayApplication.credentialHash.put(token, user);
+                return new LoginResponse(token, user.getEmail());
+            }
+            else{
+                return new LoginResponse(-1,"");
+            }
         } catch (Exception e){
             e.printStackTrace();
             return new LoginResponse(-1,"");
@@ -224,13 +243,31 @@ public class TravellerServiceImpl implements TravellerService {
         return res;
     }
 
+    public boolean updateAmountByEmail(String email , Double addAmount) {
+        try{
+            Iterable<Traveller> travellers = travellerRepository.findAll();
+            for (Traveller traveller : travellers) {
+                if (traveller.getEmail().equals(email)) {
+                    traveller.setWalletAmount(addAmount);
+                }
+            }
+            travellerRepository.saveAll(travellers);
+            return true;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+
+
+    }
+
     @Override
     public boolean addAmount(Amount amount) {
         try {
             User user = TollpayApplication.credentialHash.get(amount.getToken());
             Double currentAmount = getCurrentAmount(user.getEmail());
             currentAmount += amount.getAmount();
-            travellerRepository.updateByEmail(currentAmount, user.getEmail());
+            updateAmountByEmail(user.getEmail(), currentAmount);
             return true;
         } catch (Exception e) {
             return false;

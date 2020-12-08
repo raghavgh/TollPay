@@ -38,6 +38,7 @@ public class AuthenticationController {
                     .body("You are already registered " + user.getEmail());
         }
         catch (Exception e){
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request is not correct");
         }
     }
@@ -50,11 +51,11 @@ public class AuthenticationController {
         Log.print("DATA GOT FROM FRONTEND = " + loginData.toString());
         try {
             if(travellerService.authenticateUserData(loginData.getEmail(),loginData.getPassword())) {
-                return new ResponseEntity<>(travellerService.loginUser(loginData.getEmail()),HttpStatus.OK);
+                return new ResponseEntity<>(travellerService.loginUser(loginData.getEmail(),loginData.getPassword()),HttpStatus.OK);
             }
             else{
                 return ResponseEntity.status(HttpStatus.OK)
-                        .body("User is not Registered");
+                        .body("User is not Registered or Invalid Password");
             }
         }
         catch (Exception e){

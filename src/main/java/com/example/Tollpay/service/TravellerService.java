@@ -5,7 +5,7 @@ import com.example.Tollpay.dto.*;
 public interface TravellerService {
     public void registerTraveller(User user);
     public boolean authenticateUserData(String email,String password);
-    public LoginResponse loginUser(String email);
+    public LoginResponse loginUser(String email,String password);
     public Profile addDataIntoProfile(User user);
     public Integer checkTollPlazaInRange(Double latitude, Double longitude, Integer token);
     public boolean addAmount(Amount amount);
