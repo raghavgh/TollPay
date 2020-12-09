@@ -7,7 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class GpsData {
     private Coordinates coordinates;
-    private String email;
     private Integer token;
-    private String paymentType;
 }
