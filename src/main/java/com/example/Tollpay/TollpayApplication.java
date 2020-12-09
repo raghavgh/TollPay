@@ -16,6 +16,7 @@ public class TollpayApplication {
 
 	public static void main(String[] args) {
 		tokenHash = new boolean[10000];
+
 		credentialHash = new HashMap<>();
 		queue = new LinkedList<>();
 		for(int i = 0; i < 10000;i++){
