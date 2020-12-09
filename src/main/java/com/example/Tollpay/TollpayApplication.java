@@ -15,10 +15,10 @@ public class TollpayApplication {
 	public static Map<Integer, User> credentialHash;
 
 	public static void main(String[] args) {
-		tokenHash = new boolean[10];
+		tokenHash = new boolean[10000];
 		credentialHash = new HashMap<>();
 		queue = new LinkedList<>();
-		for(int i = 0; i < 10;i++){
+		for(int i = 0; i < 10000;i++){
 			queue.add(i);
 		}
 		SpringApplication.run(TollpayApplication.class, args);
