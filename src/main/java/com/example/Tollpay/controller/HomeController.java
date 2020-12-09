@@ -48,8 +48,7 @@ public class HomeController {
 
     @RequestMapping(value = "/profile",method = RequestMethod.POST)
     public ResponseEntity<?> getProfile(@RequestBody Session session){
-        User user = TollpayApplication.credentialHash.get(session.getToken());
-        Profile profile = service.addDataIntoProfile(user);
-        return new ResponseEntity<>(profile,HttpStatus.OK);
+        Profile user = TollpayApplication.credentialHash.get(session.getToken());
+        return new ResponseEntity<>(user,HttpStatus.OK);
     }
 }

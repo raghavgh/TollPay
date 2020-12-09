@@ -17,12 +17,15 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Transactional
 @Service
 public class TravellerServiceImpl implements TravellerService {
-    List<TollPlaza> tolls = new ArrayList<>();
+    private static List<TollPlaza> tolls = new ArrayList<>();
+    private static Map<Integer ,Double> tollCharges = new HashMap<>();
     private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
         if ((lat1 == lat2) && (lon1 == lon2)) {
             return 0;
@@ -125,8 +128,9 @@ public class TravellerServiceImpl implements TravellerService {
                 Vehicle vehicle = findByUserId(traveller.getId());
                 User user = new User(traveller.getId(), traveller.getName(), traveller.getPassword()
                         , traveller.getEmail(), traveller.getMobileNum(), vehicle.getVehicleNumber(), vehicle.getVehicleType());
+                Profile profile = getProfileData(user);
                 // use hash to store user information with token
-                TollpayApplication.credentialHash.put(token, user);
+                TollpayApplication.credentialHash.put(token, profile);
                 return new LoginResponse(token, user.getEmail());
             }
             else{
@@ -139,7 +143,8 @@ public class TravellerServiceImpl implements TravellerService {
     }
 
     @Override
-    public Profile addDataIntoProfile(User user) {
+    public Profile getProfileData(User user) {
+        //getting data from db
         Double currentAmount = getCurrentAmount(user.getEmail());
         Profile profile = new Profile(user.getName(),user.getEmail(),user.getMobileNum(),
                 user.getVehicleNumber(), user.getVehicleType(),currentAmount);
@@ -161,6 +166,7 @@ public class TravellerServiceImpl implements TravellerService {
         Double currentBalance = 0.0;
         Iterable<Traveller> travellers = travellerRepository.findAll();
         for(Traveller traveller : travellers){
+            System.out.println(traveller);
             if(traveller.getEmail().equals(email)){
                 currentBalance = traveller.getWalletAmount();
                 break;
@@ -169,31 +175,36 @@ public class TravellerServiceImpl implements TravellerService {
         return currentBalance;
     }
 
-    private boolean deductAmount(Integer token,Integer tollId){
-        User user = TollpayApplication.credentialHash.get(token);
+
+    private Double deductAmount(Integer token,Integer tollId){
+        Profile profile = TollpayApplication.credentialHash.get(token);
 
         //Logic to get toll charges for type
-        Double tollCharge = getTollCharge(tollId);
+        Double tollCharge = tollCharges.get(tollId);
 
         //Logic to get current balance of use
-        Double currentBalance = getCurrentAmount(user.getEmail());
+        Double currentBalance = TollpayApplication.credentialHash.get(token).getWalletAmount();
 
         if(currentBalance >= tollCharge){
             currentBalance -= tollCharge;
-            travellerRepository.updateByEmail(currentBalance,user.getEmail());
-            return true;
+
+            //DB OPERation
+            travellerRepository.updateByEmail(currentBalance,profile.getEmail());
+            profile.setWalletAmount(currentBalance);
+            TollpayApplication.credentialHash.replace(token,profile);
+            return currentBalance;
         }
         else{
-            return false;
+            return -1236.0;
         }
     }
 
     @Override
     public PaymentResponse getPaymentResponse(Integer token, Integer tollId) {
-        boolean status  = deductAmount(token,tollId);
-        if(status){
-            return new PaymentResponse("Payment",true,getCurrentAmount(
-                    TollpayApplication.credentialHash.get(token).getEmail()), getTollCharge(tollId));
+        Double deductedAmount  = deductAmount(token,tollId);
+        if(deductedAmount >= 0){
+            return new PaymentResponse("Payment",true
+                    ,deductedAmount, tollCharges.get(tollId));
         }
         else{
             return new PaymentResponse("Payment",false,
@@ -204,11 +215,16 @@ public class TravellerServiceImpl implements TravellerService {
     @Override
     public RangeStatus getRangeStatus(Integer token, Integer tollId) {
         String email = TollpayApplication.credentialHash.get(token).getEmail();
-        return new RangeStatus("Range",true,getTollCharge(tollId),getCurrentAmount(email));
+        Double currentAmount = TollpayApplication.credentialHash.get(token).getWalletAmount();
+        return new RangeStatus("Range",true,tollCharges.get(tollId),currentAmount);
     }
 
     private void loadTollData(){
         tolls = tollPlazaRepository.findAll();
+        for(TollPlaza toll : tolls){
+            Double charges = getTollCharge(toll.getTollId());
+            tollCharges.put(toll.getTollId(),charges);
+        }
     }
 
     private void openGates(){
@@ -226,18 +242,13 @@ public class TravellerServiceImpl implements TravellerService {
         if(tolls.size() == 0){
             loadTollData();
         }
+
         Integer res = -1;
         for(TollPlaza toll : tolls){
-            if(distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")*1000 <= 20){
+            Double dist = distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")/1000;
+            System.out.println(dist);
+            if(dist <= 20.0){
                 res = toll.getTollId();
-//                if(deductAmount(token,toll.getTollId())) {
-//                    openGates();
-//                    break;
-//                }
-//                else{
-//                    payByManualMethod();
-//                    break;
-//                }
                 break;
             }
         }
@@ -265,10 +276,14 @@ public class TravellerServiceImpl implements TravellerService {
     @Override
     public boolean addAmount(Amount amount) {
         try {
-            User user = TollpayApplication.credentialHash.get(amount.getToken());
-            Double currentAmount = getCurrentAmount(user.getEmail());
+            if(amount.getAmount() <= 0 || amount.getAmount() >=200000)
+                return false;
+            Profile profile = TollpayApplication.credentialHash.get(amount.getToken());
+            Double currentAmount = TollpayApplication.credentialHash.get(amount.getToken()).getWalletAmount();
             currentAmount += amount.getAmount();
-            updateAmountByEmail(user.getEmail(), currentAmount);
+            travellerRepository.updateByEmail( currentAmount, profile.getEmail());
+            profile.setWalletAmount(currentAmount);
+            TollpayApplication.credentialHash.replace(amount.getToken(),profile);
             return true;
         } catch (Exception e) {
             return false;
