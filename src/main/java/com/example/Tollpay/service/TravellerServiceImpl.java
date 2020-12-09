@@ -27,25 +27,34 @@ import java.util.Map;
 public class TravellerServiceImpl implements TravellerService {
     private static List<TollPlaza> tolls = new ArrayList<>();
     private static Map<Integer ,Double> tollCharges = new HashMap<>();
-    private static double distance(double lat1, double lon1, double lat2, double lon2, String unit) {
-        if ((lat1 == lat2) && (lon1 == lon2)) {
-            return 0;
-        }
-        else {
-            double theta = lon1 - lon2;
-            double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) +
-                    Math.cos(Math.toRadians(lat1)) *
-                            Math.cos(Math.toRadians(lat2)) * Math.cos(Math.toRadians(theta));
-            dist = Math.acos(dist);
-            dist = Math.toDegrees(dist);
-            dist = dist * 60 * 1.1515;
-            if (unit.equals("K")) {
-                dist = dist * 1.609344;
-            } else if (unit.equals("N")) {
-                dist = dist * 0.8684;
-            }
-            return (dist);
-        }
+    public static double distance(Double lat1,
+                                  Double lat2, Double lon1,
+                                  Double lon2)
+    {
+
+        // The math module contains a function
+        // named toRadians which converts from
+        // degrees to radians.
+        lon1 = Math.toRadians(lon1);
+        lon2 = Math.toRadians(lon2);
+        lat1 = Math.toRadians(lat1);
+        lat2 = Math.toRadians(lat2);
+
+        // Haversine formula
+        double dlon = lon2 - lon1;
+        double dlat = lat2 - lat1;
+        double a = Math.pow(Math.sin(dlat / 2), 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.pow(Math.sin(dlon / 2),2);
+
+        double c = 2 * Math.asin(Math.sqrt(a));
+
+        // Radius of earth in kilometers. Use 3956
+        // for miles
+        double r = 6371;
+
+        // calculate the result
+        return((c * r)*1000);
     }
 
     //it will find repository object and inject it into this class
@@ -253,7 +262,7 @@ public class TravellerServiceImpl implements TravellerService {
 
         Integer res = -1;
         for(TollPlaza toll : tolls){
-            Double dist = distance(toll.getLatitude(),toll.getLatitude(),latitude,longitude,"K")/1000;
+            Double dist = distance(toll.getLatitude(),latitude,toll.getLongitude(),longitude);
             System.out.println(dist);
             if(dist <= 20.0){
                 res = toll.getTollId();
