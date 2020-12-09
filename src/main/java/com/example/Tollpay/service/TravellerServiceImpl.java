@@ -14,6 +14,7 @@ import com.example.Tollpay.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
+import org.w3c.dom.ranges.Range;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -213,10 +214,17 @@ public class TravellerServiceImpl implements TravellerService {
     }
 
     @Override
-    public RangeStatus getRangeStatus(Integer token, Integer tollId) {
+    public RangeStatus getRangeStatus(Integer token, Integer tollId, Coordinates coordinates) {
         String email = TollpayApplication.credentialHash.get(token).getEmail();
         Double currentAmount = TollpayApplication.credentialHash.get(token).getWalletAmount();
-        return new RangeStatus("Range",true,tollCharges.get(tollId),currentAmount);
+        boolean status = false;
+        if(checkTollPlazaInRange(coordinates.getLatitude(),coordinates.getLongitude(),token) > 0) {
+            return new RangeStatus("Range", true
+                    , tollCharges.get(tollId), currentAmount);
+        }
+        else{
+            return new RangeStatus("Range",false,tollCharges.get(tollId),currentAmount);
+        }
     }
 
     private void loadTollData(){

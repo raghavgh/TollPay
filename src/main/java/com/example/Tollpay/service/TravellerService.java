@@ -10,5 +10,5 @@ public interface TravellerService {
     public Integer checkTollPlazaInRange(Double latitude, Double longitude, Integer token);
     public boolean addAmount(Amount amount);
     public PaymentResponse getPaymentResponse(Integer token, Integer tollId);
-    public RangeStatus getRangeStatus(Integer token, Integer tollId);
+    public RangeStatus getRangeStatus(Integer token, Integer tollId,Coordinates coordinates);
 }

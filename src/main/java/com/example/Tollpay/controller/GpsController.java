@@ -50,7 +50,7 @@ public class GpsController {
                     ,gpsData.getCoordinates().getLongitude(),gpsData.getToken());
             if(tollId != -1){
                 RangeStatus status = service.getRangeStatus(gpsData.getToken(),
-                        tollId);
+                        tollId,gpsData.getCoordinates());
                 responseEntity = new ResponseEntity<>(status,HttpStatus.OK);
             }
             else{
